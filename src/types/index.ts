@@ -13,15 +13,21 @@ export interface Championship {
   status: 'Inscrições Abertas' | 'Em Breve' | 'Encerrado';
 }
 
-export interface Inscription {
-  id: string;
-  nome: string;
-  dupla: string;
-  categoria: string;
-  status: 'Confirmado' | 'Pendente';
+export interface Inscricao {
+  id?: string;
+  prova: string;
+  animal: string;
+  competidor: string;
+  usuario?: string;
+  valor_dupla?: number;
+  valor_competidor: number;
+  status_pagamento: 'Pago' | 'Pendente';
+  arquivo?: string;
+  created_at?: string;
 }
 
 export interface UploadResult {
   success: boolean;
   fileName: string;
+  inscricoes: Inscricao[];
 }
