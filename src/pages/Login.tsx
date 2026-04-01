@@ -28,8 +28,8 @@ export default function Login() {
       setError('');
       await login(data.email, data.password);
       navigate('/dashboard');
-    } catch {
-      setError('Erro ao entrar. Tente novamente.');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Erro ao entrar. Tente novamente.');
     }
   };
 
