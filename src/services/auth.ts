@@ -1,40 +1,33 @@
+import { supabase } from '@/lib/supabase';
 import type { User } from '@/types';
 
-const STORAGE_KEY = 'ranch_sorting_user';
-
 export async function login(email: string, password: string): Promise<User> {
-  // TODO: replace with Supabase Auth
-  const mockUsers: Record<string, User> = {
-    'admin@abqm.com': { id: '1', name: 'Admin ABQM', email: 'admin@abqm.com', role: 'admin' },
-  };
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(error.message);
 
-  await new Promise((r) => setTimeout(r, 500));
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, name, role')
+    .eq('id', data.user.id)
+    .single();
 
-  const user = mockUsers[email] || {
-    id: crypto.randomUUID(),
-    name: email.split('@')[0],
+  if (profileError) throw new Error(profileError.message);
+
+  return { id: profile.id, name: profile.name, email: data.user.email!, role: profile.role };
+}
+
+export async function register(name: string, email: string, password: string): Promise<User> {
+  const { data, error } = await supabase.auth.signUp({
     email,
-    role: 'user' as const,
-  };
+    password,
+    options: { data: { name } },
+  });
+  if (error) throw new Error(error.message);
+  if (!data.user) throw new Error('Falha ao criar usuário.');
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-  return user;
+  return { id: data.user.id, name, email, role: 'user' };
 }
 
-export async function register(name: string, email: string, _password: string): Promise<User> {
-  // TODO: replace with Supabase Auth
-  await new Promise((r) => setTimeout(r, 500));
-
-  const user: User = { id: crypto.randomUUID(), name, email, role: 'user' };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-  return user;
-}
-
-export function logout(): void {
-  localStorage.removeItem(STORAGE_KEY);
-}
-
-export function getCurrentUser(): User | null {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  return raw ? JSON.parse(raw) : null;
+export async function logout(): Promise<void> {
+  await supabase.auth.signOut();
 }

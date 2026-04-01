@@ -13,6 +13,7 @@ import DashboardHome from "./pages/DashboardHome";
 import UploadPage from "./pages/UploadPage";
 import Campeonatos from "./pages/Campeonatos";
 import Perfil from "./pages/Perfil";
+import Usuarios from "./pages/dashboard/Usuarios";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="upload" element={<UploadPage />} />
               <Route path="campeonatos" element={<Campeonatos />} />
               <Route path="perfil" element={<Perfil />} />
+              <Route path="usuarios" element={<Usuarios />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

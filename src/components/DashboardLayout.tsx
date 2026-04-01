@@ -1,19 +1,22 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Trophy, Upload, User, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Trophy, Upload, User, LogOut, Menu, Users } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
 
-const links = [
-  { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-  { label: 'Campeonatos', to: '/dashboard/campeonatos', icon: Trophy },
-  { label: 'Upload Inscrições', to: '/dashboard/upload', icon: Upload },
-  { label: 'Meu Perfil', to: '/dashboard/perfil', icon: User },
+const baseLinks = [
+  { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard, adminOnly: false },
+  { label: 'Campeonatos', to: '/dashboard/campeonatos', icon: Trophy, adminOnly: false },
+  { label: 'Upload Inscrições', to: '/dashboard/upload', icon: Upload, adminOnly: false },
+  { label: 'Usuários', to: '/dashboard/usuarios', icon: Users, adminOnly: true },
+  { label: 'Meu Perfil', to: '/dashboard/perfil', icon: User, adminOnly: false },
 ];
 
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const links = baseLinks.filter((l) => !l.adminOnly || user?.role === 'admin');
 
   return (
     <div className="min-h-screen flex bg-muted">
@@ -43,7 +46,7 @@ export default function DashboardLayout() {
           })}
         </nav>
         <div className="absolute bottom-4 left-4 right-4">
-          <button onClick={logout} className="flex items-center gap-2 text-sidebar-foreground/50 hover:text-destructive text-sm w-full px-3 py-2">
+          <button onClick={() => logout()} className="flex items-center gap-2 text-sidebar-foreground/50 hover:text-destructive text-sm w-full px-3 py-2">
             <LogOut className="h-4 w-4" /> Sair
           </button>
         </div>
