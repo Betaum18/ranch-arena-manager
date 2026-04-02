@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, FileSpreadsheet, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { uploadInscricoes } from '@/services/upload';
 import type { Inscricao } from '@/types';
 
@@ -43,11 +42,7 @@ export default function UploadPage() {
     }
   };
 
-  const totalPago = inscricoes.filter((i) => i.status_pagamento === 'Pago').length;
-  const totalPendente = inscricoes.filter((i) => i.status_pagamento === 'Pendente').length;
-  const somaPago = inscricoes
-    .filter((i) => i.status_pagamento === 'Pago')
-    .reduce((acc, i) => acc + i.valor_competidor, 0);
+  const totalValor = inscricoes.reduce((acc, i) => acc + i.valor_competidor, 0);
 
   return (
     <div className="space-y-6">
@@ -106,18 +101,14 @@ export default function UploadPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="bg-card border border-border rounded-lg p-4 text-center">
               <p className="text-2xl font-heading font-bold">{inscricoes.length}</p>
               <p className="text-xs text-muted-foreground mt-1">Total de Inscrições</p>
             </div>
-            <div className="bg-card border border-green-500/20 rounded-lg p-4 text-center">
-              <p className="text-2xl font-heading font-bold text-green-500">{totalPago}</p>
-              <p className="text-xs text-muted-foreground mt-1">Pagos · R$ {somaPago.toLocaleString('pt-BR')}</p>
-            </div>
-            <div className="bg-card border border-yellow-500/20 rounded-lg p-4 text-center">
-              <p className="text-2xl font-heading font-bold text-yellow-500">{totalPendente}</p>
-              <p className="text-xs text-muted-foreground mt-1">Pendentes</p>
+            <div className="bg-card border border-border rounded-lg p-4 text-center">
+              <p className="text-2xl font-heading font-bold">R$ {totalValor.toLocaleString('pt-BR')}</p>
+              <p className="text-xs text-muted-foreground mt-1">Valor Total</p>
             </div>
           </div>
 
@@ -129,9 +120,7 @@ export default function UploadPage() {
                     <th className="text-left py-3 px-4 text-muted-foreground font-medium">Prova</th>
                     <th className="text-left py-3 px-4 text-muted-foreground font-medium">Competidor</th>
                     <th className="text-left py-3 px-4 text-muted-foreground font-medium">Animal</th>
-                    <th className="text-left py-3 px-4 text-muted-foreground font-medium">Usuário</th>
                     <th className="text-right py-3 px-4 text-muted-foreground font-medium">Valor</th>
-                    <th className="text-center py-3 px-4 text-muted-foreground font-medium">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -140,21 +129,8 @@ export default function UploadPage() {
                       <td className="py-2.5 px-4 text-xs">{i.prova}</td>
                       <td className="py-2.5 px-4 font-medium">{i.competidor}</td>
                       <td className="py-2.5 px-4 text-muted-foreground">{i.animal}</td>
-                      <td className="py-2.5 px-4 text-muted-foreground">{i.usuario ?? '—'}</td>
                       <td className="py-2.5 px-4 text-right">
                         R$ {i.valor_competidor.toLocaleString('pt-BR')}
-                      </td>
-                      <td className="py-2.5 px-4 text-center">
-                        <Badge
-                          variant={i.status_pagamento === 'Pago' ? 'default' : 'secondary'}
-                          className={
-                            i.status_pagamento === 'Pago'
-                              ? 'bg-green-500/20 text-green-600 hover:bg-green-500/20'
-                              : 'bg-yellow-500/20 text-yellow-600 hover:bg-yellow-500/20'
-                          }
-                        >
-                          {i.status_pagamento}
-                        </Badge>
                       </td>
                     </tr>
                   ))}

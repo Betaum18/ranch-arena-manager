@@ -18,10 +18,7 @@ export interface Inscricao {
   prova: string;
   animal: string;
   competidor: string;
-  usuario?: string;
-  valor_dupla?: number;
   valor_competidor: number;
-  status_pagamento: 'Pago' | 'Pendente';
   arquivo?: string;
   created_at?: string;
 }

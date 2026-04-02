@@ -21,13 +21,9 @@ function parseXls(file: File): Promise<Inscricao[]> {
             const prova = String(row['Prova'] ?? '').trim();
             const animal = String(row['Animal'] ?? '').trim();
             const competidor = String(row['Competidor'] ?? '').trim();
-            const usuario = String(row['Usuário'] ?? row['Usuario'] ?? '').trim() || undefined;
-            const valorRaw = row['Valor'];
-            const valor_dupla = valorRaw !== '' && valorRaw != null ? Number(valorRaw) : undefined;
             const valor_competidor = calcularValorCompetidor(prova);
-            const status_pagamento: 'Pago' | 'Pendente' = valor_dupla != null ? 'Pago' : 'Pendente';
 
-            return { prova, animal, competidor, usuario, valor_dupla, valor_competidor, status_pagamento };
+            return { prova, animal, competidor, valor_competidor };
           })
           .filter((i) => i.prova && i.competidor);
 
