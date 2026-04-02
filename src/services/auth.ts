@@ -3,7 +3,7 @@ import type { User } from '@/types';
 
 export async function login(email: string, password: string): Promise<User> {
   const timeout = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error('Tempo esgotado. Verifique sua conexão e tente novamente.')), 10000)
+    setTimeout(() => reject(new Error('Tempo esgotado. Verifique sua conexão e tente novamente.')), 20000)
   );
 
   const { data, error } = await Promise.race([
