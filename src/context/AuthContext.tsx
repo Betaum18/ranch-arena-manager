@@ -44,14 +44,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setUser(null);
       }
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
-    const u = await loginService(email, password);
-    setUser(u);
+    await loginService(email, password);
   };
 
   const register = async (name: string, email: string, password: string) => {

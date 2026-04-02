@@ -5,15 +5,12 @@ export async function login(email: string, password: string): Promise<User> {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw new Error(error.message);
 
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('id, name, role')
-    .eq('id', data.user.id)
-    .single();
-
-  if (profileError) throw new Error(profileError.message);
-
-  return { id: profile.id, name: profile.name, email: data.user.email!, role: profile.role };
+  return {
+    id: data.user.id,
+    name: data.user.user_metadata?.name ?? '',
+    email: data.user.email!,
+    role: 'user',
+  };
 }
 
 export async function register(name: string, email: string, password: string): Promise<User> {
