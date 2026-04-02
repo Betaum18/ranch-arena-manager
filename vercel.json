@@ -1,4 +1,7 @@
 {
+  "rewrites": [
+    { "source": "/((?!_next|assets|favicon|robots).*)", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
