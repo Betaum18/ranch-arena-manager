@@ -37,12 +37,19 @@ function parseXls(file: File): Promise<Inscricao[]> {
   });
 }
 
-export async function uploadInscricoes(file: File): Promise<UploadResult> {
-  const inscricoes = await parseXls(file);
+export async function parseInscricoes(file: File): Promise<Inscricao[]> {
+  return parseXls(file);
+}
+
+export async function salvarInscricoes(file: File, inscricoes: Inscricao[]): Promise<void> {
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Tempo esgotado ao salvar. Verifique a conexão.')), 10000)
+  );
 
   const rows = inscricoes.map((i) => ({ ...i, arquivo: file.name }));
-  const { error } = await supabase.from('inscricoes').insert(rows);
+  const { error } = await Promise.race([
+    supabase.from('inscricoes').insert(rows),
+    timeout,
+  ]);
   if (error) throw new Error(error.message);
-
-  return { success: true, fileName: file.name, inscricoes };
 }

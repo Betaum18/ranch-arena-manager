@@ -2,19 +2,21 @@ import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, FileSpreadsheet, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { uploadInscricoes } from '@/services/upload';
+import { parseInscricoes, salvarInscricoes } from '@/services/upload';
 import type { Inscricao } from '@/types';
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState('');
+  const [saveError, setSaveError] = useState('');
+  const [parseError, setParseError] = useState('');
   const [inscricoes, setInscricoes] = useState<Inscricao[]>([]);
 
   const onDrop = useCallback((accepted: File[]) => {
     if (accepted.length) {
       setFile(accepted[0]);
-      setError('');
+      setParseError('');
+      setSaveError('');
     }
   }, []);
 
@@ -30,13 +32,17 @@ export default function UploadPage() {
   const handleUpload = async () => {
     if (!file) return;
     setUploading(true);
-    setError('');
+    setParseError('');
+    setSaveError('');
     try {
-      const result = await uploadInscricoes(file);
-      setInscricoes(result.inscricoes);
+      const parsed = await parseInscricoes(file);
+      setInscricoes(parsed);
       setFile(null);
+      salvarInscricoes(file, parsed).catch((e: unknown) => {
+        setSaveError(e instanceof Error ? e.message : 'Erro ao salvar no banco.');
+      });
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Erro ao processar o arquivo.');
+      setParseError(e instanceof Error ? e.message : 'Erro ao processar o arquivo.');
     } finally {
       setUploading(false);
     }
@@ -86,9 +92,9 @@ export default function UploadPage() {
         </div>
       )}
 
-      {error && (
+      {parseError && (
         <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-          <p className="text-sm text-destructive">{error}</p>
+          <p className="text-sm text-destructive">{parseError}</p>
         </div>
       )}
 
@@ -97,9 +103,14 @@ export default function UploadPage() {
           <div className="flex items-center gap-3">
             <CheckCircle className="h-5 w-5 text-primary" />
             <p className="text-sm text-primary font-medium">
-              {inscricoes.length} inscrições importadas com sucesso.
+              {inscricoes.length} inscrições lidas com sucesso.
             </p>
           </div>
+          {saveError && (
+            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+              <p className="text-sm text-yellow-600">Aviso: {saveError}</p>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-card border border-border rounded-lg p-4 text-center">
