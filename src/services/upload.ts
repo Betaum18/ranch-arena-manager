@@ -41,12 +41,12 @@ export async function parseInscricoes(file: File): Promise<Inscricao[]> {
   return parseXls(file);
 }
 
-export async function salvarInscricoes(file: File, inscricoes: Inscricao[]): Promise<void> {
+export async function salvarInscricoes(file: File, inscricoes: Inscricao[], campeonatoId: string): Promise<void> {
   const timeout = new Promise<never>((_, reject) =>
     setTimeout(() => reject(new Error('Tempo esgotado ao salvar. Verifique a conexão.')), 10000)
   );
 
-  const rows = inscricoes.map((i) => ({ ...i, arquivo: file.name }));
+  const rows = inscricoes.map((i) => ({ ...i, arquivo: file.name, campeonato_id: campeonatoId }));
   const { error } = await Promise.race([
     supabase.from('inscricoes').insert(rows),
     timeout,

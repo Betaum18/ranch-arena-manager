@@ -1,16 +1,28 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, FileSpreadsheet, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { supabase } from '@/lib/supabase';
 import { parseInscricoes, salvarInscricoes } from '@/services/upload';
-import type { Inscricao } from '@/types';
+import type { Campeonato, Inscricao } from '@/types';
 
 export default function UploadPage() {
+  const [campeonatos, setCampeonatos] = useState<Campeonato[]>([]);
+  const [campeonatoId, setCampeonatoId] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [parseError, setParseError] = useState('');
   const [inscricoes, setInscricoes] = useState<Inscricao[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from('campeonatos')
+      .select('id, nome, data_inicio, data_fim, local')
+      .order('data_inicio', { ascending: false })
+      .then(({ data }) => setCampeonatos(data ?? []));
+  }, []);
 
   const onDrop = useCallback((accepted: File[]) => {
     if (accepted.length) {
@@ -27,10 +39,11 @@ export default function UploadPage() {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
     },
     maxFiles: 1,
+    disabled: !campeonatoId,
   });
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (!file || !campeonatoId) return;
     setUploading(true);
     setParseError('');
     setSaveError('');
@@ -38,7 +51,7 @@ export default function UploadPage() {
       const parsed = await parseInscricoes(file);
       setInscricoes(parsed);
       setFile(null);
-      salvarInscricoes(file, parsed).catch((e: unknown) => {
+      salvarInscricoes(file, parsed, campeonatoId).catch((e: unknown) => {
         setSaveError(e instanceof Error ? e.message : 'Erro ao salvar no banco.');
       });
     } catch (e: unknown) {
@@ -55,20 +68,46 @@ export default function UploadPage() {
       <div>
         <h1 className="font-heading text-2xl font-bold">Upload de Planilha de Inscritos</h1>
         <p className="text-muted-foreground mt-1 text-sm">
-          Envie o arquivo .xls ou .xlsx exportado do sistema de inscrições da ABQM.
+          Selecione o campeonato e envie o arquivo .xls ou .xlsx exportado do sistema ABQM.
         </p>
+      </div>
+
+      <div className="bg-card border border-border rounded-lg p-5 space-y-2">
+        <Label htmlFor="campeonato">Campeonato</Label>
+        <select
+          id="campeonato"
+          value={campeonatoId}
+          onChange={(e) => { setCampeonatoId(e.target.value); setFile(null); setInscricoes([]); }}
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          <option value="">Selecione um campeonato...</option>
+          {campeonatos.map((c) => (
+            <option key={c.id} value={c.id}>{c.nome}</option>
+          ))}
+        </select>
+        {campeonatos.length === 0 && (
+          <p className="text-xs text-muted-foreground">Nenhum campeonato cadastrado. Crie um primeiro na aba Campeonatos.</p>
+        )}
       </div>
 
       <div
         {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-10 text-center cursor-pointer transition-colors ${
-          isDragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+        className={`border-2 border-dashed rounded-lg p-10 text-center transition-colors ${
+          !campeonatoId
+            ? 'border-border opacity-40 cursor-not-allowed'
+            : isDragActive
+            ? 'border-primary bg-primary/5 cursor-pointer'
+            : 'border-border hover:border-primary/50 cursor-pointer'
         }`}
       >
         <input {...getInputProps()} />
         <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
         <p className="text-sm text-muted-foreground">
-          {isDragActive ? 'Solte o arquivo aqui...' : 'Arraste e solte um arquivo .xls / .xlsx aqui, ou clique para selecionar'}
+          {!campeonatoId
+            ? 'Selecione um campeonato acima para habilitar o upload'
+            : isDragActive
+            ? 'Solte o arquivo aqui...'
+            : 'Arraste e solte um arquivo .xls / .xlsx aqui, ou clique para selecionar'}
         </p>
         <p className="text-xs text-muted-foreground/60 mt-1">Apenas arquivos .xls e .xlsx</p>
       </div>
@@ -140,9 +179,7 @@ export default function UploadPage() {
                       <td className="py-2.5 px-4 text-xs">{i.prova}</td>
                       <td className="py-2.5 px-4 font-medium">{i.competidor}</td>
                       <td className="py-2.5 px-4 text-muted-foreground">{i.animal}</td>
-                      <td className="py-2.5 px-4 text-right">
-                        R$ {i.valor_competidor.toLocaleString('pt-BR')}
-                      </td>
+                      <td className="py-2.5 px-4 text-right">R$ {i.valor_competidor.toLocaleString('pt-BR')}</td>
                     </tr>
                   ))}
                 </tbody>

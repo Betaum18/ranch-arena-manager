@@ -16,6 +16,7 @@ export interface Campeonato {
 
 export interface Inscricao {
   id?: string;
+  campeonato_id?: string;
   prova: string;
   animal: string;
   competidor: string;
