@@ -57,9 +57,16 @@ export default function Inscricoes() {
     if (!selecionadas.size) return;
     setDeletando(true);
     const ids = Array.from(selecionadas);
-    const { error } = await supabase.from('inscricoes').delete().in('id', ids);
-    if (error) setError(error.message);
-    else {
+    const loteSize = 20;
+    let erroEncontrado: string | null = null;
+    for (let i = 0; i < ids.length; i += loteSize) {
+      const lote = ids.slice(i, i + loteSize);
+      const { error } = await supabase.from('inscricoes').delete().in('id', lote);
+      if (error) { erroEncontrado = error.message; break; }
+    }
+    if (erroEncontrado) {
+      setError(erroEncontrado);
+    } else {
       setInscricoes((prev) => prev.filter((i) => !selecionadas.has(i.id!)));
       setSelecionadas(new Set());
     }
