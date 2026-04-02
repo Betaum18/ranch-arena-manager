@@ -13,15 +13,23 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-async function fetchProfile(userId: string, email: string): Promise<User | null> {
-  const { data, error } = await supabase
+function sessionToUser(session: { user: { id: string; email?: string; user_metadata?: { name?: string } } }): User {
+  return {
+    id: session.user.id,
+    email: session.user.email ?? '',
+    name: session.user.user_metadata?.name ?? '',
+    role: 'user',
+  };
+}
+
+async function enrichWithProfile(base: User): Promise<User> {
+  const { data } = await supabase
     .from('profiles')
     .select('id, name, role')
-    .eq('id', userId)
+    .eq('id', base.id)
     .single();
-
-  if (error || !data) return null;
-  return { id: data.id, name: data.name, email, role: data.role };
+  if (!data) return base;
+  return { ...base, name: data.name ?? base.name, role: data.role ?? base.role };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -29,22 +37,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        const profile = await fetchProfile(session.user.id, session.user.email!);
-        setUser(profile);
+        const base = sessionToUser(session);
+        setUser(base);
+        enrichWithProfile(base).then(setUser);
       }
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        const profile = await fetchProfile(session.user.id, session.user.email!);
-        setUser(profile);
+        const base = sessionToUser(session);
+        setUser(base);
+        setLoading(false);
+        enrichWithProfile(base).then(setUser);
       } else {
         setUser(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
