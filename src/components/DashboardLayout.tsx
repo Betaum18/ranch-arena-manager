@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Trophy, Upload, User, LogOut, Menu, Users, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Trophy, Upload, User, LogOut, Menu, Users, ClipboardList, Tag } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
 
@@ -8,6 +8,7 @@ const baseLinks = [
   { label: 'Campeonatos', to: '/dashboard/campeonatos', icon: Trophy, adminOnly: false },
   { label: 'Upload Inscrições', to: '/dashboard/upload', icon: Upload, adminOnly: false },
   { label: 'Inscrições', to: '/dashboard/inscricoes', icon: ClipboardList, adminOnly: false },
+  { label: 'Categorias', to: '/dashboard/categorias', icon: Tag, adminOnly: false },
   { label: 'Usuários', to: '/dashboard/usuarios', icon: Users, adminOnly: true },
   { label: 'Meu Perfil', to: '/dashboard/perfil', icon: User, adminOnly: false },
 ];

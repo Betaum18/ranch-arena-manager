@@ -14,6 +14,7 @@ import UploadPage from "./pages/UploadPage";
 import Campeonatos from "./pages/Campeonatos";
 import Perfil from "./pages/Perfil";
 import Inscricoes from "./pages/Inscricoes";
+import Categorias from "./pages/Categorias";
 import Usuarios from "./pages/dashboard/Usuarios";
 import NotFound from "./pages/NotFound";
 
@@ -34,6 +35,7 @@ const App = () => (
               <Route index element={<DashboardHome />} />
               <Route path="upload" element={<UploadPage />} />
               <Route path="inscricoes" element={<Inscricoes />} />
+              <Route path="categorias" element={<Categorias />} />
               <Route path="campeonatos" element={<Campeonatos />} />
               <Route path="perfil" element={<Perfil />} />
               <Route path="usuarios" element={<Usuarios />} />
