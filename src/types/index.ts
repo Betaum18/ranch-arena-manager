@@ -5,12 +5,13 @@ export interface User {
   role: 'admin' | 'user';
 }
 
-export interface Championship {
-  id: string;
-  title: string;
-  date: string;
-  location: string;
-  status: 'Inscrições Abertas' | 'Em Breve' | 'Encerrado';
+export interface Campeonato {
+  id?: string;
+  nome: string;
+  data_inicio: string;
+  data_fim: string;
+  local: string;
+  created_at?: string;
 }
 
 export interface Inscricao {
